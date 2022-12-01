@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlackList } from '../../entities/black-list.entity';
 import { User } from '../../entities/user.entity';
+import { LocalStrategy } from '../../strategyes/local.strategy';
 import { BlackListService } from '../black-list/black-list.service';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { UsersService } from '../users/users.service';
@@ -30,6 +31,7 @@ import { AuthService } from './auth.service';
     JwtService,
     UsersService,
     BlackListService,
+    LocalStrategy,
   ],
 })
 export class AuthModule {}

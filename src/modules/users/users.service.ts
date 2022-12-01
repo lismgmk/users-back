@@ -42,4 +42,22 @@ WHERE ( "firstName" = $1 OR "email" = $2 );
     ]);
     return user[0];
   }
+
+  async getUserById(id: string) {
+    const queryComand = `
+SELECT * FROM public."user"
+WHERE id= $1
+    `;
+    const user = await this.dataSource.query(queryComand, [id]);
+    return user[0];
+  }
+
+  async getUserByName(name: string) {
+    const queryComand = `
+SELECT * FROM public."user"
+WHERE "firstName"= $1
+    `;
+    const user = await this.dataSource.query(queryComand, [name]);
+    return user[0];
+  }
 }

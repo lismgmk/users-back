@@ -1,9 +1,8 @@
 import { NestFactory } from '@nestjs/core';
+import { useContainer } from 'class-validator';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { useContainer } from 'class-validator';
 import { CommonErrorFilter } from './exceptions/common-error-filter';
-import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

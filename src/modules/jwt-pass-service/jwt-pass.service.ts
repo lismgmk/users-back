@@ -38,15 +38,9 @@ export class JwtPassService {
     return await bcrypt.compare(password, hash);
   }
 
-  async createJwtAccess(id: string, expiresIn: string) {
+  async createJwt(id: string, expiresIn: string) {
     const secret = this.configService.get<string>('SECRET');
     const payload = { id };
-    return this.jwtService.sign(payload, { secret, expiresIn });
-  }
-
-  async createJwtRefresh(id: string, expiresIn: string, deviceId: string) {
-    const secret = this.configService.get<string>('SECRET');
-    const payload = { id, deviceId };
     return this.jwtService.sign(payload, { secret, expiresIn });
   }
 }

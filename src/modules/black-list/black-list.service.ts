@@ -6,20 +6,20 @@ import { DataSource } from 'typeorm';
 export class BlackListService {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async addTokenClearQuery(token: string) {
+  async addToken(token: string) {
     const queryComand = `
-  INSERT INTO public."black_list"(
-	"tokenValue")
+  INSERT INTO public."black_list"
+  ("tokenValue")
 	VALUES ($1);
     `;
     await this.dataSource.query(queryComand, [token]);
     return;
   }
 
-  async getTokenClearQuery(token: string) {
+  async getToken(token: string) {
     const queryComand = `
     SELECT * FROM public."black_list"
-WHERE "tokenValue"= $1
+    WHERE "tokenValue"= $1
     `;
     const result = await this.dataSource.query(queryComand, [token]);
     return result;

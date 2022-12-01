@@ -8,11 +8,18 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { GetUserId } from '../../decorators/get-user-id.decorator';
+import { GetUser } from '../../decorators/get-user.decorator';
+import { PureRefreshToken } from '../../decorators/pure-refresh-token.decorator';
 import { User } from '../../entities/user.entity';
+import { CookieGuard } from '../../guards/cookie.guard';
+import { LocalStrategyGuard } from '../../guards/local-strategy.guard';
 import { CustomValidationPipe } from '../../pipes/validation.pipe';
 import { BlackListService } from '../black-list/black-list.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
+import { LoginAuthDto } from './dto/login-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -29,67 +36,40 @@ export class AuthController {
     return this.authService.registration(createUser);
   }
 
-  //   @HttpCode(200)
-  //   @Post('/refresh-token')
-  //   @UseFilters(new ValidationBodyExceptionFilter())
-  //   @UseFilters(new CommonErrorFilter())
-  //   @UseGuards(CookieGuard)
-  //   async getRefreshAccessToken(
-  //     @Res({ passthrough: true }) res: Response,
-  //     @GetUser() user: User,
-  //     @GetDeviceId()
-  //     deviceId: string,
-  //     @PuerRefresgToken()
-  //     refreshToken: string,
-  //   ) {
-  //     await this.blackListService.addTokenClearQuery(refreshToken);
-  //     const tokens = await this.authService.getRefreshAccessToken(
-  //       user.id.toString(),
-  //       deviceId,
-  //     );
+  @HttpCode(200)
+  @Post('/refresh-token')
+  @UseGuards(CookieGuard)
+  async getRefreshAccessToken(
+    @Res({ passthrough: true }) res: Response,
+    @GetUser() user: User,
+    @PureRefreshToken()
+    refreshToken: string,
+  ) {
+    await this.blackListService.addToken(refreshToken);
+    const tokens = await this.authService.getRefreshAccessToken(user.id);
 
-  //     await this.devicesService.changeDeviceExpiredClearQuery({
-  //       userId: user.id.toString(),
-  //       deviceId: deviceId.toString(),
-  //     });
-  //     res.cookie('refreshToken', tokens.refreshToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //     });
-  //     return { accessToken: tokens.accessToken };
-  //   }
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: tokens.accessToken };
+  }
 
-  //   @HttpCode(200)
-  //   @Post('/login')
-  //   @UseFilters(new ValidationBodyExceptionFilter())
-  //   @UseFilters(new CommonErrorFilter())
-  //   @UseGuards(LocalStrategyGuard)
-  //   async login(
-  //     @GetUserId() userId: string,
-  //     @Res({ passthrough: true }) res: Response,
-  //     @Body(new CustomValidationPipe()) loginAuthDto: LoginAuthDto,
-  //     @UserIp() userIp: string,
-  //     @DeviceName() deviceName: string,
-  //   ) {
-  //     const deviceId = uuid();
-  //     const tokens = await this.authService.getRefreshAccessToken(
-  //       userId,
-  //       deviceId,
-  //     );
-
-  //     await this.devicesService.createDevice({
-  //       id: deviceId,
-  //       ip: userIp,
-  //       userId,
-  //       deviceName,
-  //       deviceId: deviceId,
-  //     });
-  //     res.cookie('refreshToken', tokens.refreshToken, {
-  //       httpOnly: true,
-  //       secure: true,
-  //     });
-  //     return { accessToken: tokens.accessToken };
-  //   }
+  @HttpCode(200)
+  @Post('/login')
+  @UseGuards(LocalStrategyGuard)
+  async login(
+    @GetUserId() userId: string,
+    @Res({ passthrough: true }) res: Response,
+    @Body(new CustomValidationPipe()) loginAuthDto: LoginAuthDto,
+  ) {
+    const tokens = await this.authService.getRefreshAccessToken(userId);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
+    return { accessToken: tokens.accessToken };
+  }
 
   //   @HttpCode(204)
   //   @Post('/password-recovery')
@@ -111,19 +91,14 @@ export class AuthController {
   //     return this.authService.getNewPassword(getNewPassword);
   //   }
 
-  //   @HttpCode(204)
-  //   @Post('/logout')
-  //   @UseFilters(new CommonErrorFilter())
-  //   @UseGuards(CookieGuard)
-  //   async logout(
-  //     @GetUser() user: User,
-  //     @GetDeviceId()
-  //     deviceId: string,
-  //     @PuerRefresgToken()
-  //     refreshToken: string,
-  //   ) {
-  //     await this.devicesService.deleteAllExcludeCurrent(deviceId, user.id);
-  //     await this.blackListService.addTokenClearQuery(refreshToken);
-  //     return;
-  //   }
+  @HttpCode(204)
+  @Post('/logout')
+  @UseGuards(CookieGuard)
+  async logout(
+    @PureRefreshToken()
+    refreshToken: string,
+  ) {
+    await this.blackListService.addToken(refreshToken);
+    return;
+  }
 }

@@ -20,10 +20,16 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({
+    unique: true,
+    nullable: true,
+  })
   image: string = null;
 
-  @Column()
+  @Column({
+    unique: true,
+    nullable: true,
+  })
   pdf: string = null;
 
   @Column()
