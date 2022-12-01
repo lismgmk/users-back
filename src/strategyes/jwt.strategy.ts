@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
+  BadRequestException, Injectable,
+  UnauthorizedException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UsersService } from '../modules/users/users.service';
+import { INVALID_TOKEN } from '../consts/ad-validation-const';
+import { UsersQueryRepository } from '../modules/users/users.queryRepository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     private configService: ConfigService,
-    private usersService: UsersService,
+    private usersQueryRepository: UsersQueryRepository,
   ) {
     super({
       ignoreExpiration: false,
@@ -25,9 +25,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(payload: any) {
     if (!payload) {
-      throw new BadRequestException('invalid jwt token');
+      throw new BadRequestException(INVALID_TOKEN);
     }
-    const user = await this.usersService.getUserById(payload.id);
+    const user = await this.usersQueryRepository.getUserById(payload.id);
     if (!user) {
       throw new UnauthorizedException();
     }
