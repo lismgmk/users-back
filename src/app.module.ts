@@ -6,9 +6,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import Joi from 'joi';
 import { BlackList } from './entities/black-list.entity';
 import { User } from './entities/user.entity';
-import { JwtPassModule } from './jwt-pass-service/jwt-pass.module';
+import { JwtPassModule } from './modules/jwt-pass-service/jwt-pass.module';
 import { BlackListModule } from './modules/black-list/black-list.module';
-import { AuthService } from './black-list/auth/auth.service';
+import { AuthService } from './modules/auth/auth.service';
+import { JwtPassService } from './modules/jwt-pass-service/jwt-pass.service';
 
 @Module({
   imports: [
@@ -43,6 +44,6 @@ import { AuthService } from './black-list/auth/auth.service';
     BlackListModule,
   ],
   controllers: [],
-  providers: [AuthService],
+  providers: [],
 })
 export class AppModule {}

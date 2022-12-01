@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlackList } from '../../entities/black-list.entity';
 import { User } from '../../entities/user.entity';
+import { BlackListService } from '../black-list/black-list.service';
+import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
+import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
@@ -21,6 +24,12 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    JwtPassService,
+    JwtService,
+    UsersService,
+    BlackListService,
+  ],
 })
 export class AuthModule {}

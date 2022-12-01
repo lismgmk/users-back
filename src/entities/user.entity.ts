@@ -21,10 +21,10 @@ export class User {
   email: string;
 
   @Column()
-  image: string;
+  image: string = null;
 
   @Column()
-  pdf: string;
+  pdf: string = null;
 
   @Column()
   passwordHash: string;
