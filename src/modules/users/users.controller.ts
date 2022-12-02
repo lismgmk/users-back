@@ -8,10 +8,13 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CustomValidationPipe } from '../../pipes/validation.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,18 +26,22 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
   async createUser(
-    @Body(new CustomValidationPipe()) createUserDto: CreateUserDto,
+    // @Body(new CustomValidationPipe()) createUserDto: CreateUserDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.usersService.createUser(createUserDto);
+    return this.usersService.saveFile(file);
+    // return await this.usersService.createUser(createUserDto);
   }
 
   @Delete(':id')
   @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true }))
-  async deleteUser(@Param('id') id: string) {
+  async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
     return await this.usersService.deleteUserById(id);
   }
 

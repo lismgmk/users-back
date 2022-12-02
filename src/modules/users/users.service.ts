@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { path } from 'app-root-path';
+import { format } from 'date-fns';
+import { ensureDir, writeFile } from 'fs-extra';
 import { DataSource } from 'typeorm';
 import { FIELD_EXIST_VALIDATION_ERROR } from '../../consts/ad-validation-const';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
@@ -33,7 +36,7 @@ export class UsersService {
 
   async deleteUserById(id: string) {
     await this.checkExistUserById(id);
-    return this.usersQueryRepository.getUserById(id);
+    return this.usersQueryRepository.deleteUserById(id);
   }
 
   async changeUser(dto: UpdateUserDto & { id: string }) {
@@ -62,5 +65,16 @@ export class UsersService {
         message: FIELD_EXIST_VALIDATION_ERROR,
       });
     }
+  }
+
+  async saveFile(file: Express.Multer.File) {
+    const dateFolder = format(new Date(), 'yyy-MM-dd');
+    const uploadFolder = `${path}/upload/${dateFolder}`;
+    await ensureDir(uploadFolder);
+    await writeFile(`${uploadFolder}/${file.originalname}`, file.buffer);
+    return {
+      url: `${dateFolder}/${file.originalname}`,
+      name: file.originalname,
+    };
   }
 }
