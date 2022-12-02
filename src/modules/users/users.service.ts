@@ -7,7 +7,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { path } from 'app-root-path';
 import { format } from 'date-fns';
 import { hasSubscribers } from 'diagnostics_channel';
-import { ensureDir, writeFile, readFile } from 'fs-extra';
+import { ensureDir, writeFile, readFile, readFileSync } from 'fs-extra';
 import puppeteer from 'puppeteer';
 import { DataSource } from 'typeorm';
 import { FIELD_EXIST_VALIDATION_ERROR } from '../../consts/ad-validation-const';
@@ -16,7 +16,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryRepository } from './users.queryRepository';
 import hbs from 'handlebars';
-import { fstat, readFileSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class UsersService {
   constructor(
@@ -28,7 +28,7 @@ export class UsersService {
   async compile(templateName: string, data: any) {
     const filePath = `${path}/src/templates/${templateName}.hbs`;
     const html = await readFile(filePath, 'utf-8');
-    return hbs.compile(html)(data);
+    return await hbs.compile(html)(data);
   }
 
   // async compileHelper(value, format) {
@@ -37,14 +37,18 @@ export class UsersService {
 
   async getAllUsers() {
     try {
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
+      uuidv4();
 
-      const contaent = await this.compile('index', {
+      const browser = await puppeteer.launch({ headless: false });
+      const page = await browser.newPage();
+      console.log(`${path}/upload/2022-12-02/img.png`, 'xxxxx', process.cwd());
+      // const screenShot = await page.screenshot({ path: './img.png' });
+
+      const content = await this.compile('index', {
         name: 'VOVA',
-        path: readFileSync(`${path}/upload/2022-12-02/img.png`).toString(
-          'base64',
-        ),
+        path: `data:image/png;base64,${readFileSync(
+          `${path}/upload/2022-12-02/img.png`,
+        ).toString('base64')}`,
         // path: `img.png`,
       });
       // console.log(`${path}/upload/2022-12-02/img.png`);
@@ -55,10 +59,27 @@ export class UsersService {
       //   waitUntil: 'networkidle0',
       // });
 
-      await page.goto(contaent);
+      // await page.setContent(contaent);
+
+      const html = `
+      <html>
+      <body>
+        <div class="testing">
+          <h1>Hello World!</h1>
+          <img src="data:image/jpeg;base64,${readFileSync(
+            `${path}/upload/2022-12-02/img.png`,
+          ).toString('base64')}" alt="alt text" />
+        </div>
+      </body>
+      </html>
+    `;
+
+      // await page.setContent(html);
+      await page.setContent(content);
+
       await page.emulateMediaType('screen');
       await page.pdf({
-        path: 'mypdf5.pdf',
+        path: 'mypdf7.pdf',
         format: 'A4',
         printBackground: true,
       });

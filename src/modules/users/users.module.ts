@@ -14,7 +14,7 @@ import { UsersService } from './users.service';
   imports: [
     TypeOrmModule.forFeature([User]),
     ServeStaticModule.forRoot({
-      rootPath: `${path}/upload/2022-12-02`,
+      rootPath: `${path}/upload`,
     }),
   ],
   controllers: [UsersController],
