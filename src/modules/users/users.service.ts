@@ -6,14 +6,17 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { path } from 'app-root-path';
 import { format } from 'date-fns';
-import { ensureDir, writeFile } from 'fs-extra';
+import { hasSubscribers } from 'diagnostics_channel';
+import { ensureDir, writeFile, readFile } from 'fs-extra';
+import puppeteer from 'puppeteer';
 import { DataSource } from 'typeorm';
 import { FIELD_EXIST_VALIDATION_ERROR } from '../../consts/ad-validation-const';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryRepository } from './users.queryRepository';
-
+import hbs from 'handlebars';
+import { fstat, readFileSync } from 'fs';
 @Injectable()
 export class UsersService {
   constructor(
@@ -22,7 +25,48 @@ export class UsersService {
     private usersQueryRepository: UsersQueryRepository,
   ) {}
 
+  async compile(templateName: string, data: any) {
+    const filePath = `${path}/src/templates/${templateName}.hbs`;
+    const html = await readFile(filePath, 'utf-8');
+    return hbs.compile(html)(data);
+  }
+
+  // async compileHelper(value, format) {
+  //   return hbs.registerHelper('dateFormat', function (value, format) {});
+  // }
+
   async getAllUsers() {
+    try {
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+
+      const contaent = await this.compile('index', {
+        name: 'VOVA',
+        path: readFileSync(`${path}/upload/2022-12-02/img.png`).toString(
+          'base64',
+        ),
+        // path: `img.png`,
+      });
+      // console.log(`${path}/upload/2022-12-02/img.png`);
+
+      // await page.goto(`file:${filePath}`, { waitUntil: 'networkidle0' });
+      // const filePath = path.join(process.cwd(), 'nameOfSavedPdf.html');
+      // await page.goto(`${path}/src/templates/index.hbs`, {
+      //   waitUntil: 'networkidle0',
+      // });
+
+      await page.goto(contaent);
+      await page.emulateMediaType('screen');
+      await page.pdf({
+        path: 'mypdf5.pdf',
+        format: 'A4',
+        printBackground: true,
+      });
+      console.log('done');
+      await browser.close();
+    } catch (e) {
+      console.log('our log', e);
+    }
     return this.usersQueryRepository.getAllUsers();
   }
 

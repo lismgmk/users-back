@@ -11,6 +11,7 @@ async function bootstrap() {
   app.useGlobalFilters(new CommonErrorFilter());
   // app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(cookieParser());
+
   await app.listen(process.env.PORT || 5000);
 }
 bootstrap();
