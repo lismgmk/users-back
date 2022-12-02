@@ -37,8 +37,6 @@ export class UsersService {
 
   async getAllUsers() {
     try {
-      uuidv4();
-
       const browser = await puppeteer.launch({ headless: false });
       const page = await browser.newPage();
       console.log(`${path}/upload/2022-12-02/img.png`, 'xxxxx', process.cwd());
@@ -133,13 +131,20 @@ export class UsersService {
   }
 
   async saveFile(file: Express.Multer.File) {
-    const dateFolder = format(new Date(), 'yyy-MM-dd');
-    const uploadFolder = `${path}/upload/${dateFolder}`;
+    const prefix = uuidv4();
+    const fileName = `${prefix}-${file.originalname}`;
+    // const dateFolder = format(new Date(), 'yyy-MM-dd');
+    // const uploadFolder = `${path}/upload/images/${dateFolder}`;
+    const uploadFolder = `${path}/upload/images`;
     await ensureDir(uploadFolder);
-    await writeFile(`${uploadFolder}/${file.originalname}`, file.buffer);
+    await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
+    // await writeFile(`${uploadFolder}/${file.originalname}`, file.buffer);
     return {
-      url: `${dateFolder}/${file.originalname}`,
-      name: file.originalname,
+      // url: `${dateFolder}/${file.originalname}`,
+      url: `/upload/images/${fileName}`,
+      // url: `/upload/images/${file.originalname}`,
+      // name: file.originalname,
+      name: fileName,
     };
   }
 }

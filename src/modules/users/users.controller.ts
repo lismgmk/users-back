@@ -25,30 +25,19 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async createUser(
-    // @Body(new CustomValidationPipe()) createUserDto: CreateUserDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.usersService.saveFile(file);
-    // return await this.usersService.createUser(createUserDto);
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.usersService.deleteUserById(id);
-  }
-
   @Get()
   @HttpCode(200)
   async getAllUsers() {
     return await this.usersService.getAllUsers();
+  }
+
+  @Post()
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  async createUser(
+    @Body(new CustomValidationPipe()) createUserDto: CreateUserDto,
+  ) {
+    return await this.usersService.createUser(createUserDto);
   }
 
   @Put(':id')
@@ -61,5 +50,21 @@ export class UsersController {
     dto: UpdateUserDto,
   ) {
     return await this.usersService.changeUser({ ...dto, id });
+  }
+
+  @Post('/file')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async saveFile(@UploadedFile() file: Express.Multer.File) {
+    return this.usersService.saveFile(file);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.usersService.deleteUserById(id);
   }
 }

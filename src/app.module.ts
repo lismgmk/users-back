@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './modules/users/users.module';
-import { AuthModule } from './modules/auth/auth.module';
 import Joi from 'joi';
 import { BlackList } from './entities/black-list.entity';
 import { User } from './entities/user.entity';
-import { JwtPassModule } from './modules/jwt-pass-service/jwt-pass.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { BlackListModule } from './modules/black-list/black-list.module';
-import { AuthService } from './modules/auth/auth.service';
-import { JwtPassService } from './modules/jwt-pass-service/jwt-pass.service';
+import { JwtPassModule } from './modules/jwt-pass-service/jwt-pass.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
