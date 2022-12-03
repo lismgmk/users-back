@@ -5,6 +5,7 @@ import { DataSource } from 'typeorm';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+import { ITokenResponse } from './dto/auth-interfaces.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,9 @@ export class AuthService {
     await this.usersService.createUser(dto);
   }
 
-  async getRefreshAccessToken(userId: string) {
+  async getRefreshAccessToken(
+    userId: string,
+  ): Promise<ITokenResponse & { refreshToken: string }> {
     const expiredAccess = this.configService.get<string>('EXPIRED_ACCESS');
     const expiredRefresh = this.configService.get<string>('EXPIRED_REFRESH');
 

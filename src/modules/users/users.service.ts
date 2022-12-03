@@ -10,6 +10,11 @@ import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { CompileService } from './compile.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  IFileResponse,
+  IPdfResponse,
+  IUserResponse,
+} from './dto/users-interfaces.dto';
 import { UsersQueryRepository } from './users.queryRepository';
 @Injectable()
 export class UsersService {
@@ -20,11 +25,11 @@ export class UsersService {
     private compileService: CompileService,
   ) {}
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<IUserResponse[]> {
     return this.usersQueryRepository.getAllUsers();
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<IUserResponse> {
     await this.checkExistUserById(id);
     return this.usersQueryRepository.getUserByIdResponse(id);
   }
@@ -81,12 +86,15 @@ export class UsersService {
     return this.usersQueryRepository.deleteUserById(id);
   }
 
-  async saveFile(id: string, file: Express.Multer.File) {
+  async saveFile(
+    id: string,
+    file: Express.Multer.File,
+  ): Promise<IFileResponse> {
     await this.checkExistUserById(id);
     return this.compileService.saveFile(id, file);
   }
 
-  async addPdf(email: string) {
+  async addPdf(email: string): Promise<IPdfResponse> {
     const user = await this.checkExistUserByEmail(email);
     return this.compileService.addPdf(user);
   }

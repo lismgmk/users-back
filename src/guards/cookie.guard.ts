@@ -30,7 +30,6 @@ export class CookieGuard implements CanActivate {
       throw new UnauthorizedException();
     }
 
-    request.deviceId = payload.deviceId;
     request.user = user;
     return true;
   }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { BlackList } from '../../entities/black-list.entity';
 
 @Injectable()
 export class BlackListService {
@@ -16,7 +17,7 @@ export class BlackListService {
     return;
   }
 
-  async getToken(token: string) {
+  async getToken(token: string): Promise<BlackList[]> {
     const queryComand = `
     SELECT * FROM public."black_list"
     WHERE "tokenValue"= $1

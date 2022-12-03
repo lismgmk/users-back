@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { User } from '../../entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { IUserResponse } from './dto/users-interfaces.dto';
 
 @Injectable()
 export class UsersQueryRepository {
@@ -35,7 +37,7 @@ WHERE "email" = $1
 
   async getUserByEmailFirstName(
     dto: Omit<CreateUserDto, 'password' | 'lastName'>,
-  ) {
+  ): Promise<User> {
     const queryComand = `
 SELECT * FROM public."user"
 WHERE ( "firstName" = $1 OR "email" = $2 );
@@ -47,7 +49,7 @@ WHERE ( "firstName" = $1 OR "email" = $2 );
     return user[0];
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User> {
     const queryComand = `
 SELECT * FROM public."user"
 WHERE ( "email" = $1 );
@@ -56,7 +58,7 @@ WHERE ( "email" = $1 );
     return user[0];
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<User> {
     const queryComand = `
 SELECT * FROM public."user"
 WHERE id= $1
@@ -65,7 +67,7 @@ WHERE id= $1
     return user[0];
   }
 
-  async getUserByIdResponse(id: string) {
+  async getUserByIdResponse(id: string): Promise<IUserResponse> {
     const queryComand = `
 SELECT  id, "firstName", "lastName", email, image, pdf
 FROM public."user"
@@ -75,7 +77,7 @@ WHERE id= $1
     return user[0];
   }
 
-  async getUserByName(name: string) {
+  async getUserByName(name: string): Promise<User> {
     const queryComand = `
 SELECT * FROM public."user"
 WHERE "firstName"= $1
@@ -84,7 +86,7 @@ WHERE "firstName"= $1
     return user[0];
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<IUserResponse[]> {
     const queryComand = `
 SELECT id, "firstName", "lastName", email, image, pdf
  FROM public."user"

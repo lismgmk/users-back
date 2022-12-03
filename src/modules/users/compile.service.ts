@@ -9,6 +9,8 @@ import hbs from 'handlebars';
 import puppeteer from 'puppeteer';
 import { User } from '../../entities/user.entity';
 import { COMPILE_PDF_ERROR } from '../../consts/ad-validation-const';
+import { IFileResponse, IPdfResponse } from './dto/users-interfaces.dto';
+import { ICompileDto } from './dto/compile-interface';
 
 @Injectable()
 export class CompileService {
@@ -17,13 +19,13 @@ export class CompileService {
     private usersQueryRepository: UsersQueryRepository,
   ) {}
 
-  async compile(templateName: string, data: any) {
+  async compile(templateName: string, data: ICompileDto) {
     const filePath = `${path}/src/templates/${templateName}.hbs`;
     const html = await readFile(filePath, 'utf-8');
     return await hbs.compile(html)(data);
   }
 
-  async addPdf(dto: User) {
+  async addPdf(dto: User): Promise<IPdfResponse> {
     try {
       const browser = await puppeteer.launch({ headless: false });
       const page = await browser.newPage();
@@ -49,7 +51,10 @@ export class CompileService {
     }
   }
 
-  async saveFile(id: string, file: Express.Multer.File) {
+  async saveFile(
+    id: string,
+    file: Express.Multer.File,
+  ): Promise<IFileResponse> {
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
     const uploadFolder = `${path}/upload/images`;

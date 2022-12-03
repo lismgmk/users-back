@@ -9,7 +9,6 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.enableCors();
   app.useGlobalFilters(new CommonErrorFilter());
-  // app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.use(cookieParser());
 
   await app.listen(process.env.PORT || 5000);
