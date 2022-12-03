@@ -33,7 +33,7 @@ WHERE "email" = $1
     return this.dataSource.query(queryComand, [email, file]);
   }
 
-  async getUserByEmaiFirstName(
+  async getUserByEmailFirstName(
     dto: Omit<CreateUserDto, 'password' | 'lastName'>,
   ) {
     const queryComand = `
@@ -47,9 +47,28 @@ WHERE ( "firstName" = $1 OR "email" = $2 );
     return user[0];
   }
 
+  async getUserByEmail(email: string) {
+    const queryComand = `
+SELECT * FROM public."user"
+WHERE ( "email" = $1 );
+    `;
+    const user = await this.dataSource.query(queryComand, [email]);
+    return user[0];
+  }
+
   async getUserById(id: string) {
     const queryComand = `
 SELECT * FROM public."user"
+WHERE id= $1
+    `;
+    const user = await this.dataSource.query(queryComand, [id]);
+    return user[0];
+  }
+
+  async getUserByIdResponse(id: string) {
+    const queryComand = `
+SELECT  id, "firstName", "lastName", email, image, pdf
+FROM public."user"
 WHERE id= $1
     `;
     const user = await this.dataSource.query(queryComand, [id]);
@@ -67,7 +86,8 @@ WHERE "firstName"= $1
 
   async getAllUsers() {
     const queryComand = `
-SELECT * FROM public."user"
+SELECT id, "firstName", "lastName", email, image, pdf
+ FROM public."user"
     `;
     return this.dataSource.query(queryComand);
   }
@@ -81,28 +101,33 @@ WHERE id = $1;
   }
 
   async changeUser(dto: UpdateUserDto & { id: string }) {
+    const helperDto = {
+      firstName: 'empty',
+      lastName: 'empty',
+      email: 'empty',
+      ...dto,
+    };
     const queryComand = `
    UPDATE "user"
 SET 
 "firstName" =  CASE
-      WHEN $2 != NULL  THEN $2
-      ELSE "firstName"
+      WHEN $2 = 'empty'  THEN "user"."firstName" 
+      ELSE $2
 END,
 "lastName" =  CASE
-      WHEN $3 != NULL  THEN $3
-      ELSE "lastName"
+      WHEN $3 = 'empty'  THEN "user"."lastName" 
+      ELSE  $3
 END,
 "email" =  CASE
-      WHEN $4 != NULL  THEN $4
-      ELSE "email"
+      WHEN $4 = 'empty' THEN "user"."email"
+      ELSE  $4
 END
-WHERE id = $1;
- RETURNING *   `;
+WHERE id = $1 `;
     return this.dataSource.query(queryComand, [
-      dto.id,
-      dto.firstName,
-      dto.lastName,
-      dto.email,
+      helperDto.id,
+      helperDto.firstName,
+      helperDto.lastName,
+      helperDto.email,
     ]);
   }
 

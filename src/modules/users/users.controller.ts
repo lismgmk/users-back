@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,13 +15,15 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { OWNER_ERROR } from '../../consts/ad-validation-const';
-import { GetUser } from '../../decorators/get-user.decorator';
-import { User } from '../../entities/user.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CustomValidationPipe } from '../../pipes/validation.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  IFileResponse,
+  IPdfResponse,
+  IUserResponse,
+} from './dto/users-interfaces.dto';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -31,12 +32,21 @@ export class UsersController {
 
   @Get()
   @HttpCode(200)
-  async getAllUsers() {
+  async getAllUsers(): Promise<IUserResponse[]> {
     return await this.usersService.getAllUsers();
   }
 
-  @Post()
+  @Get(':id')
   @HttpCode(200)
+  async getUserById(
+    @Param('id', ParseUUIDPipe)
+    id: string,
+  ): Promise<IUserResponse> {
+    return await this.usersService.getUserById(id);
+  }
+
+  @Post()
+  @HttpCode(204)
   @UseGuards(JwtAuthGuard)
   async createUser(
     @Body(new CustomValidationPipe()) createUserDto: CreateUserDto,
@@ -56,6 +66,14 @@ export class UsersController {
     return await this.usersService.changeUser({ ...dto, id });
   }
 
+  @Delete(':id')
+  @HttpCode(204)
+  @UseGuards(JwtAuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
+    return await this.usersService.deleteUserById(id);
+  }
+
   @Post('/file/:id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
@@ -63,7 +81,7 @@ export class UsersController {
   async saveFile(
     @UploadedFile() file: Express.Multer.File,
     @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  ): Promise<IFileResponse> {
     return this.usersService.saveFile(id, file);
   }
 
@@ -73,21 +91,7 @@ export class UsersController {
   async addPdf(
     @Body(new CustomValidationPipe())
     dto: Pick<UpdateUserDto, 'email'>,
-    @GetUser() user: User,
-  ) {
-    if (dto.email !== user.email) {
-      throw new BadRequestException({
-        message: OWNER_ERROR,
-      });
-    }
-    return this.usersService.addPdf(user);
-  }
-
-  @Delete(':id')
-  @HttpCode(204)
-  @UseGuards(JwtAuthGuard)
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async deleteUser(@Param('id', ParseUUIDPipe) id: string) {
-    return await this.usersService.deleteUserById(id);
+  ): Promise<IPdfResponse> {
+    return this.usersService.addPdf(dto.email);
   }
 }

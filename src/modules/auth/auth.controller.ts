@@ -17,6 +17,7 @@ import { CustomValidationPipe } from '../../pipes/validation.pipe';
 import { BlackListService } from '../black-list/black-list.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthService } from './auth.service';
+import { ITokenResponse } from './dto/auth-interfaces.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
 
 @Controller('auth')
@@ -42,7 +43,7 @@ export class AuthController {
     @GetUser() user: User,
     @PureRefreshToken()
     refreshToken: string,
-  ) {
+  ): Promise<ITokenResponse> {
     await this.blackListService.addToken(refreshToken);
     const tokens = await this.authService.getRefreshAccessToken(user.id);
 
@@ -60,7 +61,7 @@ export class AuthController {
     @GetUserId() userId: string,
     @Res({ passthrough: true }) res: Response,
     @Body(new CustomValidationPipe()) loginAuthDto: LoginAuthDto,
-  ) {
+  ): Promise<ITokenResponse> {
     const tokens = await this.authService.getRefreshAccessToken(userId);
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
@@ -68,26 +69,6 @@ export class AuthController {
     });
     return { accessToken: tokens.accessToken };
   }
-
-  //   @HttpCode(204)
-  //   @Post('/password-recovery')
-  //   @UseFilters(new ValidationBodyExceptionFilter())
-  //   @UseFilters(new CommonErrorFilter())
-  //   async passwordRecovery(
-  //     @Body(new CustomValidationPipe()) resendingEmail: ResendingEmailDto,
-  //   ) {
-  //     return this.authService.passwordRecovery(resendingEmail.email);
-  //   }
-
-  //   @HttpCode(204)
-  //   @Post('/new-password')
-  //   @UseFilters(new ValidationBodyExceptionFilter())
-  //   @UseFilters(new CommonErrorFilter())
-  //   async getNewPassword(
-  //     @Body(new CustomValidationPipe()) getNewPassword: GetNewPasswordDto,
-  //   ) {
-  //     return this.authService.getNewPassword(getNewPassword);
-  //   }
 
   @HttpCode(204)
   @Post('/logout')

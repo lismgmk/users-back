@@ -1,0 +1,64 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { path } from 'app-root-path';
+import { DataSource } from 'typeorm';
+import { UsersQueryRepository } from './users.queryRepository';
+import { ensureDir, readFile, readFileSync, writeFile } from 'fs-extra';
+import { v4 as uuidv4 } from 'uuid';
+import hbs from 'handlebars';
+import puppeteer from 'puppeteer';
+import { User } from '../../entities/user.entity';
+import { COMPILE_PDF_ERROR } from '../../consts/ad-validation-const';
+
+@Injectable()
+export class CompileService {
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    private usersQueryRepository: UsersQueryRepository,
+  ) {}
+
+  async compile(templateName: string, data: any) {
+    const filePath = `${path}/src/templates/${templateName}.hbs`;
+    const html = await readFile(filePath, 'utf-8');
+    return await hbs.compile(html)(data);
+  }
+
+  async addPdf(dto: User) {
+    try {
+      const browser = await puppeteer.launch({ headless: false });
+      const page = await browser.newPage();
+
+      const content = await this.compile('index', {
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        path: `data:image/png;base64,${readFileSync(
+          `${path}/upload/images/${dto.image}`,
+        ).toString('base64')}`,
+      });
+      await page.setContent(content);
+
+      const pdfFile = await page.pdf({
+        format: 'A4',
+        printBackground: true,
+      });
+      await this.usersQueryRepository.addPdf(dto.email, pdfFile);
+      await browser.close();
+      return pdfFile.toJSON();
+    } catch (err) {
+      throw new BadRequestException(COMPILE_PDF_ERROR);
+    }
+  }
+
+  async saveFile(id: string, file: Express.Multer.File) {
+    const prefix = uuidv4();
+    const fileName = `${prefix}-${file.originalname}`;
+    const uploadFolder = `${path}/upload/images`;
+    await ensureDir(uploadFolder);
+    await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
+    await this.usersQueryRepository.addImagePath(id, fileName);
+    return {
+      url: `/upload/images/${fileName}`,
+      name: file.originalname,
+    };
+  }
+}

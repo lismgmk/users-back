@@ -9,6 +9,7 @@ import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { UsersController } from './users.controller';
 import { UsersQueryRepository } from './users.queryRepository';
 import { UsersService } from './users.service';
+import { CompileService } from './compile.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersService } from './users.service';
     JwtService,
     JwtStrategy,
     UsersQueryRepository,
+    CompileService,
   ],
 })
 export class UsersModule {}

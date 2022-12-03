@@ -8,6 +8,7 @@ import { User } from '../../entities/user.entity';
 import { LocalStrategy } from '../../strategyes/local.strategy';
 import { BlackListService } from '../black-list/black-list.service';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
+import { CompileService } from '../users/compile.service';
 import { UsersQueryRepository } from '../users/users.queryRepository';
 import { UsersService } from '../users/users.service';
 import { AuthController } from './auth.controller';
@@ -34,6 +35,7 @@ import { AuthService } from './auth.service';
     BlackListService,
     LocalStrategy,
     UsersQueryRepository,
+    CompileService,
   ],
 })
 export class AuthModule {}
