@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,6 +16,9 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { OWNER_ERROR } from '../../consts/ad-validation-const';
+import { GetUser } from '../../decorators/get-user.decorator';
+import { User } from '../../entities/user.entity';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { CustomValidationPipe } from '../../pipes/validation.pipe';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -52,12 +56,31 @@ export class UsersController {
     return await this.usersService.changeUser({ ...dto, id });
   }
 
-  @Post('/file')
+  @Post('/file/:id')
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async saveFile(@UploadedFile() file: Express.Multer.File) {
-    return this.usersService.saveFile(file);
+  async saveFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.usersService.saveFile(id, file);
+  }
+
+  @Post('/add-pdf')
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  async addPdf(
+    @Body(new CustomValidationPipe())
+    dto: Pick<UpdateUserDto, 'email'>,
+    @GetUser() user: User,
+  ) {
+    if (dto.email !== user.email) {
+      throw new BadRequestException({
+        message: OWNER_ERROR,
+      });
+    }
+    return this.usersService.addPdf(user);
   }
 
   @Delete(':id')

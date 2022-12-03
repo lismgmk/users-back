@@ -21,16 +21,16 @@ export class User {
   email: string;
 
   @Column({
-    unique: true,
+    type: 'bytea',
     nullable: true,
   })
-  image: string = null;
+  pdf: Buffer = null;
 
   @Column({
     unique: true,
     nullable: true,
   })
-  pdf: string = null;
+  image: string = null;
 
   @Column()
   passwordHash: string;

@@ -5,18 +5,20 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { path } from 'app-root-path';
-import { format } from 'date-fns';
-import { hasSubscribers } from 'diagnostics_channel';
-import { ensureDir, writeFile, readFile, readFileSync } from 'fs-extra';
+import { ensureDir, readFile, readFileSync, writeFile } from 'fs-extra';
+import hbs from 'handlebars';
 import puppeteer from 'puppeteer';
 import { DataSource } from 'typeorm';
-import { FIELD_EXIST_VALIDATION_ERROR } from '../../consts/ad-validation-const';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  COMPILE_PDF_ERROR,
+  FIELD_EXIST_VALIDATION_ERROR,
+} from '../../consts/ad-validation-const';
+import { User } from '../../entities/user.entity';
 import { JwtPassService } from '../jwt-pass-service/jwt-pass.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryRepository } from './users.queryRepository';
-import hbs from 'handlebars';
-import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class UsersService {
   constructor(
@@ -36,57 +38,90 @@ export class UsersService {
   // }
 
   async getAllUsers() {
+    // try {
+    //   const browser = await puppeteer.launch({ headless: false });
+    //   const page = await browser.newPage();
+    //   // const screenShot = await page.screenshot({ path: './img.png' });
+
+    //   const content = await this.compile('index', {
+    //     name: 'VOVA',
+    //     path: `data:image/png;base64,${readFileSync(
+    //       `${path}/upload/images/9aa0ca1d-c9e1-4230-8900-85a6c431de33-Screenshot from 2022-07-31 17-10-23.png`,
+    //     ).toString('base64')}`,
+    //     // path: `img.png`,
+    //   });
+    // console.log(`${path}/upload/2022-12-02/img.png`);
+
+    // await page.goto(`file:${filePath}`, { waitUntil: 'networkidle0' });
+    // const filePath = path.join(process.cwd(), 'nameOfSavedPdf.html');
+    // await page.goto(`${path}/src/templates/index.hbs`, {
+    //   waitUntil: 'networkidle0',
+    // });
+
+    // await page.setContent(contaent);
+
+    //   const html = `
+    //   <html>
+    //   <body>
+    //     <div class="testing">
+    //       <h1>Hello World!</h1>
+    //       <img src="data:image/jpeg;base64,${readFileSync(
+    //         `${path}/upload/2022-12-02/img.png`,
+    //       ).toString('base64')}" alt="alt text" />
+    //     </div>
+    //   </body>
+    //   </html>
+    // `;
+    // console.log('content', content);
+
+    // await page.setContent(html);
+    //   await page.setContent(content);
+
+    //   await page.emulateMediaType('screen');
+    //   const pdfFile = await page.pdf({
+    //     // path: 'mypdf7.pdf',
+    //     format: 'A4',
+    //     printBackground: true,
+    //   });
+    //   console.log('done');
+    //   await this.usersQueryRepository.addPdf(email, pdfFile);
+    //   console.log(pdfFile.toString('base64'));
+
+    //   await browser.close();
+    // } catch (e) {
+    //   // await browser.close();
+    //   console.log('our log', e);
+    // }
+    return this.usersQueryRepository.getAllUsers();
+  }
+
+  async addPdf(dto: User) {
     try {
       const browser = await puppeteer.launch({ headless: false });
       const page = await browser.newPage();
-      console.log(`${path}/upload/2022-12-02/img.png`, 'xxxxx', process.cwd());
-      // const screenShot = await page.screenshot({ path: './img.png' });
 
       const content = await this.compile('index', {
-        name: 'VOVA',
+        firstName: dto.firstName,
+        lastName: dto.lastName,
         path: `data:image/png;base64,${readFileSync(
-          `${path}/upload/2022-12-02/img.png`,
+          `${path}/upload/images/${dto.image}`,
         ).toString('base64')}`,
-        // path: `img.png`,
       });
-      // console.log(`${path}/upload/2022-12-02/img.png`);
-
-      // await page.goto(`file:${filePath}`, { waitUntil: 'networkidle0' });
-      // const filePath = path.join(process.cwd(), 'nameOfSavedPdf.html');
-      // await page.goto(`${path}/src/templates/index.hbs`, {
-      //   waitUntil: 'networkidle0',
-      // });
-
-      // await page.setContent(contaent);
-
-      const html = `
-      <html>
-      <body>
-        <div class="testing">
-          <h1>Hello World!</h1>
-          <img src="data:image/jpeg;base64,${readFileSync(
-            `${path}/upload/2022-12-02/img.png`,
-          ).toString('base64')}" alt="alt text" />
-        </div>
-      </body>
-      </html>
-    `;
-
-      // await page.setContent(html);
       await page.setContent(content);
 
-      await page.emulateMediaType('screen');
-      await page.pdf({
-        path: 'mypdf7.pdf',
+      const pdfFile = await page.pdf({
         format: 'A4',
         printBackground: true,
       });
-      console.log('done');
+      await this.usersQueryRepository.addPdf(dto.email, pdfFile);
       await browser.close();
-    } catch (e) {
-      console.log('our log', e);
+      console.log(pdfFile.toString('base64'));
+
+      return pdfFile.toJSON();
+    } catch (err) {
+      console.log('our log', err);
+      throw new BadRequestException(COMPILE_PDF_ERROR);
     }
-    return this.usersQueryRepository.getAllUsers();
   }
 
   async createUser(dto: CreateUserDto) {
@@ -112,6 +147,11 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException();
     }
+    // if (user && id !== user.email) {
+    //   throw new BadRequestException({
+    //     message: OWNER_ERROR,
+    //   });
+    // }
   }
 
   async checkExistUserByNameEmail(
@@ -130,21 +170,17 @@ export class UsersService {
     }
   }
 
-  async saveFile(file: Express.Multer.File) {
+  async saveFile(id: string, file: Express.Multer.File) {
+    await this.checkExistUserById(id);
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
-    // const dateFolder = format(new Date(), 'yyy-MM-dd');
-    // const uploadFolder = `${path}/upload/images/${dateFolder}`;
     const uploadFolder = `${path}/upload/images`;
     await ensureDir(uploadFolder);
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
-    // await writeFile(`${uploadFolder}/${file.originalname}`, file.buffer);
+    await this.usersQueryRepository.addImagePath(id, fileName);
     return {
-      // url: `${dateFolder}/${file.originalname}`,
       url: `/upload/images/${fileName}`,
-      // url: `/upload/images/${file.originalname}`,
-      // name: file.originalname,
-      name: fileName,
+      name: file.originalname,
     };
   }
 }

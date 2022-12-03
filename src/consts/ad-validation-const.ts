@@ -1,3 +1,5 @@
+export const COMPILE_PDF_ERROR = 'pdf compilation error';
+export const OWNER_ERROR = 'you are not owner';
 export const FIELD_EXIST_VALIDATION_ERROR = 'field already exists';
 export const FIELD_LENGTH_VALIDATION_ERROR = 'length of field is invalid';
 export const FIELD_EMAIL_VALIDATION_ERROR = 'email of field is invalid';

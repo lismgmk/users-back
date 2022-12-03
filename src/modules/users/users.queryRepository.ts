@@ -23,6 +23,16 @@ VALUES ($1, $2, $3, $4);
     return;
   }
 
+  async addPdf(email: string, file: any) {
+    const queryComand = `
+   UPDATE "user"
+SET 
+"pdf" = $2 
+WHERE "email" = $1
+`;
+    return this.dataSource.query(queryComand, [email, file]);
+  }
+
   async getUserByEmaiFirstName(
     dto: Omit<CreateUserDto, 'password' | 'lastName'>,
   ) {
@@ -94,5 +104,15 @@ WHERE id = $1;
       dto.lastName,
       dto.email,
     ]);
+  }
+
+  async addImagePath(id: string, image: string) {
+    const queryComand = `
+   UPDATE "user"
+SET 
+"image" = $2 
+WHERE id = $1;
+`;
+    return this.dataSource.query(queryComand, [id, image]);
   }
 }
