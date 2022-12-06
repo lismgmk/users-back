@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
-  publish = "src"
-  functions = "serverless"
+  publish = "dist/src"
+  functions = "dist/serverless"
 
 [[redirects]]
   from = "/*"
