@@ -1,9 +1,9 @@
 [build]
   command = "npm run build"
-  publish = ""
+  publish = "src"
   functions = "serverless"
 
 [[redirects]]
   from = "/*"
-  to = "serverless"
+  to = "/.netlify/functions/main"
   status = 200
