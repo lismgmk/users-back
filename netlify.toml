@@ -5,5 +5,5 @@
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/main"
+  to = "serverless"
   status = 200
