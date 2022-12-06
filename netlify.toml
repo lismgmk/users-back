@@ -1,7 +1,7 @@
 [build]
   command = "npm run build"
-  publish = ""
-  functions = "dist/netlify/functions"
+  publish = "dist/src"
+  functions = "dist/serverless"
 
 [[redirects]]
   from = "/*"
