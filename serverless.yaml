@@ -1,4 +1,4 @@
-service: users-back
+service: usersback
 
 useDotenv: true
 
