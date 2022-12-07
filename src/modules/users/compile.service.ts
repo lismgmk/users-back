@@ -58,6 +58,13 @@ export class CompileService {
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
     const uploadFolder = `${path}/upload/images`;
+    console.log(
+      uploadFolder,
+      'fffffffffffffolder',
+      fileName,
+      'filName!!!!!!!!',
+    );
+
     await ensureDir(uploadFolder);
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
     await this.usersQueryRepository.addImagePath(id, fileName);
