@@ -57,7 +57,7 @@ export class CompileService {
   ): Promise<IFileResponse> {
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
-    const uploadFolder = `${path}src/upload/images`;
+    const uploadFolder = `${path}/src/upload/images`;
     console.log(
       uploadFolder,
       'fffffffffffffolder',
@@ -69,7 +69,7 @@ export class CompileService {
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
     await this.usersQueryRepository.addImagePath(id, fileName);
     return {
-      url: `src/upload/images/${fileName}`,
+      url: `/src/upload/images/${fileName}`,
       name: file.originalname,
     };
   }
