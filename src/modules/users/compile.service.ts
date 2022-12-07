@@ -66,7 +66,10 @@ export class CompileService {
     );
 
     try {
-      await ensureDir(uploadFolder);
+      await ensureDir(uploadFolder, (err) => {
+        if (err) return console.log(err);
+        console.log('Directory exists');
+      });
     } catch (e) {
       console.log('errror ensureDir', e);
     }
