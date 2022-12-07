@@ -65,6 +65,17 @@ export class CompileService {
       'filName!!!!!!!!',
     );
 
+    try {
+      await ensureDir(uploadFolder);
+    } catch (e) {
+      console.log('errror ensureDir', e);
+    }
+
+    try {
+      await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
+    } catch (e) {
+      console.log('errror writeDir', e);
+    }
     await ensureDir(uploadFolder);
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
     await this.usersQueryRepository.addImagePath(id, fileName);
