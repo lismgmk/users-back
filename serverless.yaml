@@ -1,4 +1,4 @@
-service: cryptostats-backend
+service: usersback
 
 useDotenv: true
 
@@ -7,7 +7,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs18.x
+  runtime: nodejs16.x
   environment:
     POSTGRES_HOST: ${env:POSTGRES_HOST}
     POSTGRES_PORT: ${env:POSTGRES_PORT}
@@ -20,7 +20,7 @@ provider:
 
 functions:
   main:
-    handler: dist/serverless.handler
+    handler: dist/server.handler
     events:
       - http:
           method: ANY
