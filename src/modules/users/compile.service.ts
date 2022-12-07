@@ -34,7 +34,7 @@ export class CompileService {
         firstName: dto.firstName,
         lastName: dto.lastName,
         path: `data:image/png;base64,${readFileSync(
-          `${path}/src/upload/images/${dto.image}`,
+          `${path}/upload/images/${dto.image}`,
         ).toString('base64')}`,
       });
       await page.setContent(content);
@@ -57,7 +57,7 @@ export class CompileService {
   ): Promise<IFileResponse> {
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
-    const uploadFolder = `${path}/src/upload/images`;
+    const uploadFolder = `${path}/upload/images`;
     console.log(
       uploadFolder,
       'fffffffffffffolder',
@@ -83,7 +83,7 @@ export class CompileService {
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
     await this.usersQueryRepository.addImagePath(id, fileName);
     return {
-      url: `/src/upload/images/${fileName}`,
+      url: `/upload/images/${fileName}`,
       name: file.originalname,
     };
   }
