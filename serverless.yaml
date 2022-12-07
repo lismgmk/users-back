@@ -1,0 +1,30 @@
+service: users-back
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  environment:
+    POSTGRES_HOST: ${env:POSTGRES_HOST}
+    POSTGRES_PORT: ${env:POSTGRES_PORT}
+    POSTGRES_USER: ${env:POSTGRES_USER}
+    POSTGRES_PASSWORD: ${env:POSTGRES_PASSWORD}
+    POSTGRES_DB: ${env:POSTGRES_DB}
+    EXPIRED_ACCESS: ${env:EXPIRED_ACCESS}
+    EXPIRED_REFRESH: ${env:EXPIRED_REFRESH}
+    SECRET: ${env:SECRET}
+
+functions:
+  main:
+    handler: dist/server.handler
+    events:
+      - http:
+          method: ANY
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
