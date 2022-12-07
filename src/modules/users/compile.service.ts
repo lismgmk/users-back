@@ -29,6 +29,7 @@ export class CompileService {
     try {
       const browser = await puppeteer.launch({ headless: false });
       const page = await browser.newPage();
+      console.log(`${path}/upload/images/${dto.image}`, 'ddddddddddddddddd');
 
       const content = await this.compile('index', {
         firstName: dto.firstName,
@@ -58,28 +59,11 @@ export class CompileService {
     const prefix = uuidv4();
     const fileName = `${prefix}-${file.originalname}`;
     const uploadFolder = `${path}/upload/images`;
-    console.log(
-      uploadFolder,
-      'fffffffffffffolder',
-      fileName,
-      'filName!!!!!!!!',
-    );
 
-    try {
-      await ensureDir(uploadFolder, (err) => {
-        if (err) return console.log(err);
-        console.log('Directory exists');
-      });
-    } catch (e) {
-      console.log('errror ensureDir', e);
-    }
-
-    try {
-      await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
-    } catch (e) {
-      console.log('errror writeDir', e);
-    }
-    await ensureDir(uploadFolder);
+    await ensureDir(uploadFolder, (err) => {
+      if (err) return console.log(err);
+      console.log('Directory exists');
+    });
     await writeFile(`${uploadFolder}/${fileName}`, file.buffer);
     await this.usersQueryRepository.addImagePath(id, fileName);
     return {
