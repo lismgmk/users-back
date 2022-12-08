@@ -12,5 +12,7 @@ async function bootstrap() {
   app.use(cookieParser());
 
   await app.listen(process.env.PORT || 5000);
+  console.log(process.env.POSTGRES_PASSWORD, process.env.POSTGRES_USER);
+  
 }
 bootstrap();

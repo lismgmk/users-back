@@ -16,7 +16,8 @@ export default class TypeOrmConfig {
       password: configService.get<string>('POSTGRES_PASSWORD'),
       database: configService.get<string>('POSTGRES_DB'),
       entities: [User, BlackList],
-      synchronize: true,
+      // synchronize: false,
+      autoLoadEntities: true,
     };
   }
 }
